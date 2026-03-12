@@ -1,29 +1,3 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
-```
-
-### Step 4 — Redeploy
-
-Trigger a fresh deployment after saving settings. Your site should come up at all routes.
-
----
-
-## 2. Root Cause — What Was Actually Happening
-
-**What Vercel was doing:** Scanning the repo root for a buildable project. It found `frontend/`, `backend/`, and `contracts/` but no `package.json` at the root, no `index.html`, nothing to serve.
-
-**What it needed:** To be pointed at `frontend/` where the actual React app and `package.json` live.
-
-**The misconception:** Vercel feels like a "smart" host that figures everything out automatically — and it does for single-app repos. But with a monorepo, it has no way to know *which* folder is the deployable frontend without you telling it explicitly via the Root Directory setting.
-
----
-
-## 3. The Underlying Concept
-
-Vercel's routing model is **filesystem-as-routes**. Every URL it serves must map to either a physical file in the build output or an explicit rule. There's no magic fallback.
-```
-Build output (dist/):
-  index.html        →  serves GET /
-  assets/main.js    →  serves GET /assets/main.js
-  (nothing else)    →  404 for GET /dashboard, /vote/1, etc.
